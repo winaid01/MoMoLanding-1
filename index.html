@@ -98,6 +98,8 @@
 
 		  <!-- 병원 식별자 그대로 -->
 		  <input type="hidden" id="hospital_mb_id" value="momo5050">
+		  <input type="text" id="hp" style="display:none" tabindex="-1" autocomplete="off">
+
 
 		  <!-- 디자인 버튼 그대로 사용 -->
 		  <img src="./index_files/btn.png" class="img-fluid DB-btn" style="cursor:pointer" alt="신청하기">
@@ -536,28 +538,56 @@
 
 <script>
 (function(){
+  // ── 경량 방어용: 폼에 허니팟(hidden), 페이지 로드 타임스탬프 ──
+  //  (랜딩 HTML 어딘가에 추가해두세요)
+  //  <input type="text" id="hp" style="display:none" tabindex="-1" autocomplete="off">
+  const pageStart = Date.now();
+
+  // 30초 로컬 쓰로틀(도배 방지)
+  const THROTTLE_MS = 30 * 1000;
+
   document.addEventListener('click', async function(e){
     const btn = e.target.closest('.DB-btn');
     if(!btn) return;
 
+    // 이미 전송 중이면 무시
+    if (btn.dataset.busy === '1') return;
+
+    // 입력 수집
     const name  = document.getElementById('lead_name').value.trim();
     const phone = document.getElementById('lead_phone').value.replace(/\D+/g,'');
     const age   = document.getElementById('lead_age').value;
     const agree = document.getElementById('agree_marketing').checked ? 1 : 0;
     const hosp  = document.getElementById('hospital_mb_id').value;
-
     const agreePrivacy = document.getElementById('agree_privacy').checked;
+
+    // 프론트 밸리데이션
     if(!agreePrivacy){ alert('개인정보 수집·이용에 동의해 주세요.'); return; }
     if(!name || !phone || !age){ alert('성함/연락처/나이를 입력해 주세요.'); return; }
 
-    // ★ JSON 대신 x-www-form-urlencoded 로 보냄 (프리플라이트 회피)
+    // 로컬 쓰로틀(30초 내 재전송 차단)
+    const lastTs = +localStorage.getItem('lead_lastTs') || 0;
+    if (Date.now() - lastTs < THROTTLE_MS) {
+      alert('잠시 후 다시 시도해 주세요.');
+      return;
+    }
+
+    // 허니팟 값 읽기(봇이 채우면 차단)
+    const hp = (document.getElementById('hp')?.value || '').trim();
+
+    // 버튼 잠금 + 시각적 피드백
+    btn.dataset.busy = '1';
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.6';
+
+    // 서버가 폼과 JSON 모두 받으므로 폼으로 전송(프리플라이트 회피)
     const payload = new URLSearchParams({
       hospital_mb_id: hosp,
-      name: name,
-      phone: phone,
-      age_group: age,
+      name, phone, age_group: age,
       agree_marketing: String(agree),
-      referer: location.href
+      referer: location.href,
+      hp: hp,                 // 허니팟
+      t0: String(pageStart)   // 페이지 로드시각(서버에서 최소 소요시간 체크)
     });
 
     try{
@@ -566,25 +596,39 @@
         headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
         body: payload.toString()
       });
-
       const text = await res.text();
       let data = null;
       try { data = JSON.parse(text); } catch(e){}
-      console.log('[proxy] status=', res.status, 'raw=', text);
 
       if(!res.ok || !data || !data.success){
         const msg = (data && data.message) ? data.message : text || 'Unknown error';
         alert('오류: ' + msg);
         return;
       }
+
+      // 성공: 입력값 초기화 + 마지막 전송 시간 기록
+      document.getElementById('lead_name').value = '';
+      document.getElementById('lead_phone').value = '';
+      document.getElementById('lead_age').value = '';
+      document.getElementById('agree_marketing').checked = false;
+      document.getElementById('agree_privacy').checked = false;
+      if (document.getElementById('hp')) document.getElementById('hp').value = '';
+
+      localStorage.setItem('lead_lastTs', String(Date.now()));
       alert('접수되었습니다.');
     }catch(err){
       console.error(err);
-      alert('네트워크 오류: ' + (err && err.message ? err.message : 'unknown'));
+      alert('네트워크 오류: ' + (err?.message || 'unknown'));
+    }finally{
+      // 버튼 잠금 해제
+      btn.dataset.busy = '0';
+      btn.style.pointerEvents = '';
+      btn.style.opacity = '';
     }
   });
 })();
 </script>
+
 
 
 
