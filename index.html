@@ -63,36 +63,48 @@
 
     </section>
 
-    <section class="sec04">
-      <img src="./index_files/section04-bg.png" class="img-fluid">
-      <form>
-        <div class="DB-BG">
-          <div class="DB-input">
-            <input type="text" placeholder="성함을 입력해주세요">
-            <input type="tel" placeholder="연락처를 입력해주세요">
-            <select name="age" id="age">
-              <option value="" selected="" disabled="">나이를 선택해주세요</option>
-              <option value="20">20대</option>
-              <option value="30">30대</option>
-              <option value="40">40대</option>
-              <option value="50">50대</option>
-              <option value="60">60대</option>
-            </select>
-          </div>
-          
-          <div class="DB-chk">
-            <div class="DB-chk-1f">
-              <label><input type="checkbox"> (필수) 개인정보 수집 및 이용 동의</label> <span class="btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">[보기]</span>
-            </div>
-            <div class="DB-chk-1f">
-              <label><input type="checkbox"> (선택) 마케팅 이용 및 활용 동의</label> <span class="btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal1">[보기]</span>
-            </div>
-          </div>
+	<!-- 기존 그대로 -->
+	<section class="sec04">
+	  <img src="./index_files/section04-bg.png" class="img-fluid">
+	  <form onsubmit="return false">
+		<div class="DB-BG">
+		  <div class="DB-input">
+			<!-- ✅ ID 부여 -->
+			<input type="text" id="lead_name" placeholder="성함을 입력해주세요">
+			<input type="tel"  id="lead_phone" placeholder="연락처를 입력해주세요">
+			<!-- ✅ id="lead_age" 로 변경 -->
+			<select id="lead_age">
+			  <option value="" selected disabled>나이를 선택해주세요</option>
+			  <option value="20">20대</option>
+			  <option value="30">30대</option>
+			  <option value="40">40대</option>
+			  <option value="50">50대</option>
+			  <option value="60">60대</option>
+			</select>
+		  </div>
+
+		  <div class="DB-chk">
+			<div class="DB-chk-1f">
+			  <!-- (필수) 개인정보 동의는 별도 ID 없어도 되고, 마케팅만 우리 스크립트에서 씁니다 -->
+			  <label><input type="checkbox" id="agree_privacy"> (필수) 개인정보 수집 및 이용 동의</label>
+			  <span class="btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">[보기]</span>
+			</div>
+			<div class="DB-chk-1f">
+			  <!-- ✅ 마케팅 동의 ID 부여 -->
+			  <label><input type="checkbox" id="agree_marketing"> (선택) 마케팅 이용 및 활용 동의</label>
+			  <span class="btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal1">[보기]</span>
+			</div>
+		  </div>
+
+		  <!-- 병원 식별자 그대로 -->
 		  <input type="hidden" id="hospital_mb_id" value="momo_hospital">
-          <img src="./index_files/btn.png" class="img-fluid DB-btn" style="cursor:pointer" alt="신청하기">
-        </div>
-      </form>
-    </section>
+
+		  <!-- 디자인 버튼 그대로 사용 -->
+		  <img src="./index_files/btn.png" class="img-fluid DB-btn" style="cursor:pointer" alt="신청하기">
+		</div>
+	  </form>
+	</section>
+
 
     <section class="sec05">
       <img src="./index_files/section05-bg.png" class="img-fluid">
@@ -519,7 +531,8 @@
   }
 
   setInterval(scrollList, 2000);
-</script></body><!-- Modal --></html>
+</script>
+
 
 <script>
 (function(){
@@ -559,3 +572,12 @@
   });
 })();
 </script>
+
+
+
+
+
+
+
+</body><!-- Modal --></html>
+
