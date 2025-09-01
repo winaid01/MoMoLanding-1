@@ -540,11 +540,15 @@
     const btn = e.target.closest('.DB-btn');
     if(!btn) return;
 
-    const name  = document.getElementById('lead_name')?.value.trim();
-    const phone = (document.getElementById('lead_phone')?.value || '').replace(/\D+/g,'');
-    const age   = document.getElementById('lead_age')?.value;
-    const agree = document.getElementById('agree_marketing')?.checked ? 1 : 0;
-    const hosp  = document.getElementById('hospital_mb_id')?.value;
+    const name  = document.getElementById('lead_name').value.trim();
+    const phone = document.getElementById('lead_phone').value.replace(/\D+/g,'');
+    const age   = document.getElementById('lead_age').value;
+    const agree = document.getElementById('agree_marketing').checked ? 1 : 0;
+    const hosp  = document.getElementById('hospital_mb_id').value;
+
+    // (선택) 개인정보 필수 체크
+    const agreePrivacy = document.getElementById('agree_privacy').checked;
+    if(!agreePrivacy){ alert('개인정보 수집·이용에 동의해 주세요.'); return; }
 
     if(!name || !phone || !age){ alert('성함/연락처/나이를 입력해 주세요.'); return; }
 
