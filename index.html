@@ -88,8 +88,8 @@
               <label><input type="checkbox"> (선택) 마케팅 이용 및 활용 동의</label> <span class="btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal1">[보기]</span>
             </div>
           </div>
-
-          <img src="./index_files/btn.png" class="img-fluid DB-btn">
+		  <input type="hidden" id="hospital_mb_id" value="momo_hospital">
+          <img src="./index_files/btn.png" class="img-fluid DB-btn" style="cursor:pointer" alt="신청하기">
         </div>
       </form>
     </section>
@@ -520,3 +520,42 @@
 
   setInterval(scrollList, 2000);
 </script></body><!-- Modal --></html>
+
+<script>
+(function(){
+  document.addEventListener('click', async function(e){
+    const btn = e.target.closest('.DB-btn');
+    if(!btn) return;
+
+    const name  = document.getElementById('lead_name')?.value.trim();
+    const phone = (document.getElementById('lead_phone')?.value || '').replace(/\D+/g,'');
+    const age   = document.getElementById('lead_age')?.value;
+    const agree = document.getElementById('agree_marketing')?.checked ? 1 : 0;
+    const hosp  = document.getElementById('hospital_mb_id')?.value;
+
+    if(!name || !phone || !age){ alert('성함/연락처/나이를 입력해 주세요.'); return; }
+
+    const payload = {
+      hospital_mb_id: hosp,
+      name, phone,
+      age_group: age,
+      agree_marketing: agree,
+      referer: location.href
+    };
+
+    try{
+      const res = await fetch('https://medicallink08.mycafe24.com/proxy_landing.php', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if(!res.ok || !data.success) throw new Error(data.message || '저장 실패');
+      alert('접수되었습니다.');
+    }catch(err){
+      console.error(err);
+      alert('일시적 오류입니다. 잠시 후 다시 시도해 주세요.');
+    }
+  });
+})();
+</script>
