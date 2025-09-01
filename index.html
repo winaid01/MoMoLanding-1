@@ -546,19 +546,11 @@
     const agree = document.getElementById('agree_marketing').checked ? 1 : 0;
     const hosp  = document.getElementById('hospital_mb_id').value;
 
-    // (선택) 개인정보 필수 체크
     const agreePrivacy = document.getElementById('agree_privacy').checked;
     if(!agreePrivacy){ alert('개인정보 수집·이용에 동의해 주세요.'); return; }
-
     if(!name || !phone || !age){ alert('성함/연락처/나이를 입력해 주세요.'); return; }
 
-    const payload = {
-      hospital_mb_id: hosp,
-      name, phone,
-      age_group: age,
-      agree_marketing: agree,
-      referer: location.href
-    };
+    const payload = { hospital_mb_id: hosp, name, phone, age_group: age, agree_marketing: agree, referer: location.href };
 
     try{
       const res = await fetch('https://medicallink08.mycafe24.com/proxy_landing.php', {
@@ -566,12 +558,22 @@
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify(payload)
       });
-      const data = await res.json();
-      if(!res.ok || !data.success) throw new Error(data.message || '저장 실패');
+
+      // 응답 본문을 먼저 받아서 디버깅에 쓰자
+      const text = await res.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch(e){}
+      console.log('[proxy] status=', res.status, 'raw=', text);
+
+      if(!res.ok || !data || !data.success){
+        const msg = (data && data.message) ? data.message : text || 'Unknown error';
+        alert('오류: ' + msg);
+        return;
+      }
       alert('접수되었습니다.');
     }catch(err){
       console.error(err);
-      alert('일시적 오류입니다. 잠시 후 다시 시도해 주세요.');
+      alert('네트워크 오류: ' + (err && err.message ? err.message : 'unknown'));
     }
   });
 })();
