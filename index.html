@@ -550,16 +550,23 @@
     if(!agreePrivacy){ alert('개인정보 수집·이용에 동의해 주세요.'); return; }
     if(!name || !phone || !age){ alert('성함/연락처/나이를 입력해 주세요.'); return; }
 
-    const payload = { hospital_mb_id: hosp, name, phone, age_group: age, agree_marketing: agree, referer: location.href };
+    // ★ JSON 대신 x-www-form-urlencoded 로 보냄 (프리플라이트 회피)
+    const payload = new URLSearchParams({
+      hospital_mb_id: hosp,
+      name: name,
+      phone: phone,
+      age_group: age,
+      agree_marketing: String(agree),
+      referer: location.href
+    });
 
     try{
       const res = await fetch('https://medicallink08.mycafe24.com/proxy_landing.php', {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
+        headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+        body: payload.toString()
       });
 
-      // 응답 본문을 먼저 받아서 디버깅에 쓰자
       const text = await res.text();
       let data = null;
       try { data = JSON.parse(text); } catch(e){}
